@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // مسابقة الطباعة السريعة: القراءة والكتابة مفتوحة لمجموعات المسابقة فقط
+    match /comp/{doc} {
+      allow read, write: if true;
+    }
+    match /players/{id} {
+      allow read: if true;
+      allow create, update: if request.resource.data.name is string
+                            && request.resource.data.name.size() <= 60;
+      allow delete: if true;
+    }
+    match /entries/{id} {
+      allow read, write: if true;
+    }
+    match /rounds/{id} {
+      allow read, write: if true;
+    }
+    // أي مسار آخر مغلق
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

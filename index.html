@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مسابقة الطباعة السريعة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=Readex+Pro:wght@400;500;700&family=Noto+Naskh+Arabic:wght@500;600&display=swap">
+<style>
+/* Layout: white stage, keycap 3D buttons; main stage + live round board side panel; final report full width */
+:root{
+  --bg:#ffffff; --panel:#f4f6fb; --ink:#14213d; --muted:#5b6782;
+  --accent:#1f5eff; --gold:#c89211; --ok:#13804b; --bad:#d1293d; --line:#dde3ef; --warn:#fff1c7;
+  --display:"Lalezar","Readex Pro",system-ui,sans-serif;
+  --body:"Readex Pro","Segoe UI",Tahoma,sans-serif;
+  --text:"Noto Naskh Arabic","Traditional Arabic","Readex Pro",serif;
+  color-scheme:light;
+}
+html,body{background:var(--bg);color:var(--ink)}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--body);direction:rtl;font-size:15px;line-height:1.6}
+.wrap{max-width:1240px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px solid var(--line);padding-bottom:14px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,42px);margin:0;line-height:1.2;text-wrap:balance}
+h1 span{color:var(--accent)}
+.sub{color:var(--muted);margin:0;font-size:14px}
+.hright{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pill{font-weight:700;padding:6px 14px;border-radius:99px;background:#e9edf6;font-size:14px;white-space:nowrap}
+.pill.live{background:#ffe1e5;color:var(--bad)}
+.pill.open{background:#dff3e8;color:var(--ok)}
+.key{font:500 14px var(--body);color:var(--ink);background:linear-gradient(#fff,#e9edf6);border:1px solid #c7cfe0;border-radius:10px;padding:9px 16px;cursor:pointer;box-shadow:0 4px 0 #b9c3d8,0 6px 12px rgba(20,33,61,.12);transition:transform .08s,box-shadow .08s}
+.key:active,.key.on{transform:translateY(3px);box-shadow:0 1px 0 #b9c3d8,0 2px 4px rgba(20,33,61,.12)}
+.key.primary{color:#fff;background:linear-gradient(#3d78ff,#1f5eff);border-color:#1647c4;box-shadow:0 4px 0 #1240a8,0 6px 14px rgba(31,94,255,.3)}
+.key.gold{color:#3b2a00;background:linear-gradient(#ffe08a,#e6b02b);border-color:#b8870f;box-shadow:0 4px 0 #a17406,0 6px 14px rgba(200,146,17,.3)}
+.key.red{color:#fff;background:linear-gradient(#ef5466,#d1293d);border-color:#a51d2e;box-shadow:0 4px 0 #8f1626,0 6px 14px rgba(209,41,61,.25)}
+.key.sm{padding:5px 10px;font-size:12px;box-shadow:0 3px 0 #b9c3d8}
+.key:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.key:disabled{opacity:.45;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;margin-top:20px}
+@media (max-width:920px){.grid{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:20px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.card.admin{background:#fffaf0;border:2px dashed var(--gold)}
+h2{font-family:var(--display);font-weight:400;font-size:24px;margin:0 0 10px}
+h3{font-size:16px;margin:0 0 8px}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+input[type=text],input[type=number],input[type=password],select,textarea.in{font:15px var(--body);width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid #c7cfe0;border-radius:9px;background:#fff;color:var(--ink)}
+textarea.in{font-family:var(--text);font-size:18px;resize:vertical;min-height:70px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.row>div{flex:1 1 180px;min-width:0}
+.note{font-size:13px;color:var(--muted);margin:6px 0 0}
+.big{font-family:var(--display);font-size:clamp(26px,4vw,36px);line-height:1.3;margin:0}
+.center{text-align:center}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.passage{font-family:var(--text);font-size:clamp(22px,3vw,32px);line-height:2.1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 20px;user-select:none;word-spacing:3px}
+.passage .c{color:#9aa4ba}.passage .ok{color:var(--ok)}
+.passage .no{color:var(--bad);text-decoration:underline wavy var(--bad)}
+.passage .cur{background:var(--warn);border-radius:4px}
+.typebox{width:100%;box-sizing:border-box;margin-top:12px;font:24px var(--text);direction:rtl;padding:12px 16px;border:2px solid #c7cfe0;border-radius:12px;resize:none;height:100px;color:var(--ink);background:#fff}
+.typebox:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(31,94,255,.15)}
+.clock{font-family:var(--display);font-size:56px;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
+.bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:12px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--accent))}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;gap:10px}
+.overlay .n{font-family:var(--display);font-size:min(40vw,240px);line-height:1;color:var(--accent)}
+.overlay .t{font-family:var(--display);font-size:30px;color:var(--muted)}
+.n.pop{animation:pop .9s ease-out}
+@keyframes pop{from{transform:scale(1.5);opacity:0}to{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.n.pop{animation:none}}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 6px;text-align:right;border-bottom:1px solid var(--line)}
+th{font-size:12px;color:var(--muted);font-weight:500;white-space:nowrap}
+td.n{font-variant-numeric:tabular-nums;text-align:center;white-space:nowrap}
+.tw{overflow-x:auto}
+.rank{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#e9edf6;font-size:12px;font-weight:700}
+.r1 .rank{background:#e6b02b;color:#fff}.r2 .rank{background:#9aa6bd;color:#fff}.r3 .rank{background:#c98a52;color:#fff}
+.st{font-size:12px;padding:2px 9px;border-radius:99px;white-space:nowrap;background:#e9edf6;color:var(--muted)}
+.st.done{background:#dff3e8;color:var(--ok)}.st.typing{background:#e3ebff;color:var(--accent)}
+.st.dnf,.st.out{background:#ffe1e5;color:var(--bad)}.st.win{background:#fff1c7;color:#8a6200}
+tr.cut td{background:#fff3f4}
+.x{background:none;border:0;color:var(--bad);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px}
+.empty{color:var(--muted);text-align:center;padding:18px 8px;font-size:14px}
+/* final report */
+.report{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;margin-top:20px}
+.rhead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px;align-items:end;border-bottom:3px double var(--gold);padding-bottom:14px;margin-bottom:18px}
+.podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:20px;align-items:end}
+.pod{border-radius:14px;padding:14px;text-align:center;border:1px solid var(--line);background:var(--panel)}
+.pod .m{font-family:var(--display);font-size:34px;line-height:1}
+.pod b{display:block;font-size:17px;margin-top:6px}
+.pod .tm{font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px}
+.pod.p1{background:linear-gradient(#fff8dd,#ffeaa6);border-color:#e6b02b;padding-block:24px}
+.pod.p1 .m{color:#a87400}.pod.p2 .m{color:#6b7790}.pod.p3 .m{color:#9a5f2b}
+@media (max-width:560px){.podium{grid-template-columns:minmax(0,1fr)}}
+.sumrow{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.sum{background:var(--panel);border-radius:10px;padding:8px 14px;font-size:13px;color:var(--muted)}
+.sum b{color:var(--ink);font-size:18px;margin-inline-start:6px;font-variant-numeric:tabular-nums}
+footer{margin-top:28px;text-align:center;display:flex;flex-direction:column;gap:4px}
+footer .org{font-weight:700;font-size:15px}
+footer .by{font-weight:700;font-size:15px;background:linear-gradient(90deg,#a87400,#f3c94a,#a87400);-webkit-background-clip:text;background-clip:text;color:transparent}
+.err{background:#ffe1e5;color:var(--bad);border-radius:10px;padding:10px 14px;margin-top:10px;font-size:14px}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>مسابقة <span>الطباعة السريعة</span></h1>
+      <p class="sub">كلية الإدارة والاقتصاد · جامعة الموصل</p>
+    </div>
+    <div class="hright">
+      <span class="pill" id="roundPill">جارٍ الاتصال…</span>
+      <button class="key sm" id="adminBtn">لوحة الحكم</button>
+    </div>
+  </header>
+
+  <div id="msg"></div>
+  <div class="grid" id="mainGrid">
+    <div class="col">
+      <section class="card admin" id="admin" hidden></section>
+      <section class="card" id="stage"><p class="empty">جارٍ تحميل المسابقة…</p></section>
+    </div>
+    <aside class="card" id="board"></aside>
+  </div>
+  <div id="final" hidden></div>
+
+  <footer>
+    <div class="org">الجهة المنظمة: قسم إدارة الأعمال، شعبة النشاطات الطلابية</div>
+    <div class="by">برمجة وتصميم : علي عبد الوهاب الصفار</div>
+  </footer>
+</div>
+
+<div class="overlay" id="cd" hidden><div class="t" id="cdt">استعد…</div><div class="n" id="cdn">10</div></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="config.js"></script>
+<script>
+const ADMIN_PIN="1967";
+const DEPTS=[
+ {n:"إدارة الأعمال",e:"🦁"},{n:"المحاسبة",e:"🦅"},{n:"نظم المعلومات الإدارية",e:"🐺"},
+ {n:"الإدارة الصناعية",e:"🐻"},{n:"العلوم المالية والمصرفية",e:"🐯"},{n:"التسويق",e:"🦌"},{n:"الاقتصاد",e:"🐎"}];
+const BANK=[
+"الموصل مدينة عريقة على ضفتي نهر دجلة ويسميها أهلها أم الربيعين",
+"جامعة الموصل من أكبر الجامعات العراقية وتضم كليات علمية وإنسانية كثيرة",
+"الإدارة الناجحة تقوم على التخطيط والتنظيم والتوجيه والرقابة المستمرة",
+"الحاسوب جهاز يستقبل البيانات ويعالجها ثم يخرج النتائج بسرعة ودقة",
+"الذكاء الاصطناعي يساعد المؤسسات على تحليل البيانات واتخاذ القرار",
+"المحاسبة لغة الأعمال لأنها تسجل العمليات المالية وتلخصها في قوائم",
+"التسويق جسر بين المنتج والمستهلك يدرس حاجات الناس ورغباتهم",
+"علم الاقتصاد يدرس كيف نستخدم الموارد المحدودة لإشباع الحاجات المتعددة",
+"البنوك تقبل الودائع وتمنح القروض وتقدم خدمات الدفع والتحويل الإلكتروني",
+"الوقت أثمن ما يملكه الطالب ومن نظم يومه حقق أهدافه بهدوء",
+"القراءة اليومية توسع المعارف وتحسن اللغة وتقوي القدرة على التعبير",
+"نظم المعلومات الإدارية تحول البيانات إلى تقارير تساعد المديرين",
+"الإدارة الصناعية تنظم عمليات الإنتاج وتضبط الجودة وتقلل الهدر",
+"الرياضة تمنح الجسم قوة وتعلم الإنسان الصبر والعمل بروح الفريق",
+"الكتابة السريعة على لوحة المفاتيح مهارة تتحسن بالتمرين اليومي"
+];
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=ms=>ms==null?"—":(ms/1000).toFixed(2)+" ث";
+const norm=s=>s.replace(/[أإآ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/\s+/g," ");
+const ls={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const ss={get(k){try{return sessionStorage.getItem(k)}catch(e){return null}},set(k,v){try{sessionStorage.setItem(k,v)}catch(e){}}};
+
+let db=null;
+const D={state:null,players:{},entries:{},rounds:{}};
+let isAdmin=ss.get("tr-admin")==="1";
+let seat=ls.get("tr-seat"); // {r,pid}
+let L={nonce:null,stage:null,t0:0,errors:0,timer:null};
+let draft={sentence:null,cd:10,elim:1,cut:null,round:null};
+
+function st(){return D.state||{round:1,phase:"open"}}
+function roundEntries(r){return Object.values(D.entries).filter(e=>e.r===r)}
+function sortEntries(list){return list.slice().sort((a,b)=>{
+  const va=a.status==="done"?a.ms:Infinity, vb=b.status==="done"?b.ms:Infinity;
+  return va-vb||(a.name||"").localeCompare(b.name||"","ar")})}
+function allDone(r){const es=roundEntries(r);return es.length>0&&es.every(e=>e.status!=="joined")}
+function usedSentences(){return new Set(Object.values(D.rounds).map(x=>x.sentence).concat(st().phase!=="open"&&st().sentence?[st().sentence]:[]))}
+function suggest(){const used=usedSentences();const pool=BANK.filter(s=>!used.has(s)&&s!==draft.sentence);const p=pool.length?pool:BANK;return p[Math.floor(Math.random()*p.length)]}
+function showErr(t){$("msg").innerHTML=t?`<div class="err">${esc(t)}</div>`:"";if(t)setTimeout(()=>{$("msg").innerHTML=""},6000)}
+async function w(fn){try{await fn()}catch(e){showErr(e&&e.code==="quota_exceeded"?"امتلأت قاعدة البيانات. احذف بيانات مسابقة قديمة ثم أعد المحاولة.":"تعذر الحفظ. تأكد من اتصال الإنترنت ثم أعد المحاولة.");throw e}}
+
+/* ---------------- boot (Firebase Firestore) ---------------- */
+(async()=>{
+  const cfg=window.FIREBASE_CONFIG||{};
+  if(!window.firebase||!cfg.projectId||String(cfg.projectId).startsWith("PUT_")){
+    $("roundPill").textContent="غير متصل";
+    $("stage").innerHTML=`<h2>المسابقة غير مربوطة بقاعدة البيانات بعد</h2><p>ضع إعدادات مشروع Firebase في ملف config.js ثم أعد تحميل الصفحة.</p>`;
+    $("board").innerHTML="";return}
+  try{firebase.initializeApp(cfg);db=firebase.firestore()}catch(e){showErr("تعذر تشغيل قاعدة البيانات. راجع ملف config.js.");return}
+  const err=()=>showErr("انقطع الاتصال بقاعدة المسابقة. تأكد من الإنترنت ثم أعد تحميل الصفحة.");
+  db.doc("comp/state").onSnapshot(s=>{D.state=s.exists?s.data():null;tick()},err);
+  db.collection("players").onSnapshot(s=>{D.players={};s.docs.forEach(d=>D.players[d.id]={id:d.id,...d.data()});tick()},err);
+  db.collection("entries").onSnapshot(s=>{D.entries={};s.docs.forEach(d=>D.entries[d.id]={id:d.id,...d.data()});tick()},err);
+  db.collection("rounds").onSnapshot(s=>{D.rounds={};s.docs.forEach(d=>D.rounds[d.id]=d.data());tick()},err);
+})();
+
+let tickQueued=false;
+function tick(){if(tickQueued)return;tickQueued=true;requestAnimationFrame(()=>{tickQueued=false;render()})}
+
+/* ---------------- render ---------------- */
+let lastStageKey="";
+function render(){
+  const S=st();
+  const pill=$("roundPill");
+  pill.className="pill "+(S.phase==="live"?"live":S.phase==="open"?"open":"");
+  pill.textContent=S.phase==="final"?"النتائج النهائية":`الجولة ${S.round} · `+({open:"التسجيل مفتوح",live:allDone(S.round)?"انتهت":"جارية",closed:"مغلقة"}[S.phase]||"");
+  // seat sanity
+  if(seat&&(seat.r!==S.round||!D.entries[seat.r+"_"+seat.pid])&&S.phase!=="final"){if(seat.r!==S.round){seat=null;ls.set("tr-seat",null)}}
+  // final view
+  const fin=S.phase==="final";
+  $("mainGrid").hidden=fin&&!isAdmin;$("final").hidden=!fin;
+  if(fin)renderFinal();
+  $("adminBtn").textContent=isAdmin?"خروج من لوحة الحكم":"لوحة الحكم";
+  $("admin").hidden=!isAdmin; if(isAdmin)renderAdmin();
+  if(!fin||isAdmin){renderBoard();renderStage()}
+  maybeStartLocal();
+}
+
+function renderStage(){
+  const S=st(),mine=seat&&D.entries[seat.r+"_"+seat.pid];
+  let key=S.phase+"|"+S.round+"|"+(mine?mine.status:"none")+"|"+(L.stage||"")+"|"+(S.nonce||"");
+  if(S.phase==="open"&&!mine)key+="|"+Object.keys(D.players).length+"|"+roundEntries(S.round).length+"|"+Object.values(D.players).filter(p=>p.out).length;
+  if(S.phase==="closed"&&mine)key+="|"+JSON.stringify(D.rounds["r"+S.round]?.eliminated||[]);
+  if(key===lastStageKey)return;lastStageKey=key;
+  const el=$("stage");
+  if(S.phase==="final"){el.innerHTML=`<p class="empty">النتائج النهائية معروضة أسفل الصفحة.</p>`;return}
+  if(!mine){
+    if(S.phase==="open"){
+      const inRound=new Set(roundEntries(S.round).map(e=>e.pid));
+      const avail=Object.values(D.players).filter(p=>!p.out&&!inRound.has(p.id)).sort((a,b)=>a.name.localeCompare(b.name,"ar"));
+      el.innerHTML=`<h2>الانضمام إلى الجولة ${S.round}</h2>
+      ${avail.length?`<h3>متسابق مسجل سابقاً</h3><div class="row"><div><label for="pickP">اختر اسمك</label><select id="pickP">${avail.map(p=>`<option value="${p.id}">${DEPTS[p.dept].e} ${esc(p.name)} · ${DEPTS[p.dept].n}</option>`).join("")}</select></div><button class="key primary" id="joinOld">انضمام</button></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0">`:""}
+      <h3>متسابق جديد</h3>
+      <div class="row"><div><label for="newName">الاسم الثلاثي</label><input type="text" id="newName" maxlength="60" autocomplete="off"></div>
+      <div><label for="newDept">القسم</label><select id="newDept">${DEPTS.map((d,i)=>`<option value="${i}">${d.e} ${d.n}</option>`).join("")}</select></div>
+      <button class="key gold" id="joinNew">تسجيل وانضمام</button></div>
+      <p class="note">يحتفظ التطبيق بالاسم، فإذا عاد المتسابق في جولة لاحقة يختار اسمه من القائمة.</p>`;
+      $("joinOld")&&($("joinOld").onclick=()=>join($("pickP").value));
+      $("joinNew").onclick=registerAndJoin;
+      $("newName").addEventListener("keydown",e=>{if(e.key==="Enter")registerAndJoin()});
+    }else{
+      el.innerHTML=`<div class="center"><p class="big">${S.phase==="live"?`الجولة ${S.round} جارية الآن`:`انتهت الجولة ${S.round}`}</p><p class="note">انتظر حتى يفتح الحكم التسجيل للجولة القادمة.</p></div>`;
+    }
+    return;
+  }
+  const p=D.players[mine.pid]||mine;
+  const head=`<div class="row" style="align-items:center;margin-bottom:10px"><div><span style="font-size:34px">${DEPTS[p.dept]?.e||""}</span> <b style="font-size:20px">${esc(p.name)}</b><div class="note">قسم ${DEPTS[p.dept]?.n||""} · الجولة ${S.round}</div></div></div>`;
+  if(S.phase==="open"){
+    el.innerHTML=head+`<div class="center"><p class="big">أنت مسجل، استعد</p><p class="note">ستظهر الجملة بعد أن يشغّل الحكم العداد. ضع أصابعك على لوحة المفاتيح.</p><div class="actions" style="justify-content:center"><button class="key sm" id="leave">ليس أنا / تغيير المتسابق</button></div></div>`;
+    $("leave").onclick=leave;return;
+  }
+  if(mine.status==="joined"&&S.phase==="live"){
+    if(L.stage==="type"){
+      el.innerHTML=head+`<div class="row" style="align-items:center;justify-content:space-between"><div class="clock" id="clock">0.00</div><div class="note">الأخطاء: <b id="errs">0</b></div></div>
+      <div class="passage" id="passage"></div><textarea class="typebox" id="typed" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="اكتب الجملة هنا…"></textarea><div class="bar"><i id="prog"></i></div>`;
+      paint("");const t=$("typed");t.focus();
+      t.addEventListener("input",onType);["paste","drop"].forEach(ev=>t.addEventListener(ev,e=>e.preventDefault()));
+    }else el.innerHTML=head+`<p class="big center">استعد…</p>`;
+    return;
+  }
+  if(mine.status==="done"||mine.status==="dnf"){
+    const elim=D.rounds["r"+S.round]?.eliminated;
+    const out=elim&&elim.includes(mine.pid);
+    el.innerHTML=head+`<div class="center"><p class="note">وقتك في هذه الجولة</p><div class="clock">${mine.status==="done"?fmt(mine.ms):"لم يكمل"}</div>
+    <p class="note">الأخطاء: ${mine.errors||0}</p>
+    ${S.phase==="closed"?(out?`<p class="big" style="color:var(--bad)">انتهت مشاركتك، شكراً لك</p>`:`<p class="big" style="color:var(--ok)">تأهلت إلى الجولة التالية</p>`):`<p class="note">بانتظار بقية المتسابقين وقرار الحكم.</p>`}
+    ${S.phase==="closed"?`<div class="actions" style="justify-content:center"><button class="key" id="freeSeat">إخلاء الحاسبة لمتسابق آخر</button></div>`:""}</div>`;
+    $("freeSeat")&&($("freeSeat").onclick=()=>{seat=null;ls.set("tr-seat",null);lastStageKey="";render()});
+    return;
+  }
+  el.innerHTML=head;
+}
+
+async function registerAndJoin(){
+  const name=$("newName").value.trim().replace(/\s+/g," ");if(!name){$("newName").focus();return}
+  const dup=Object.values(D.players).find(p=>p.name===name);
+  if(dup){showErr("هذا الاسم مسجل مسبقاً. اختره من قائمة المتسابقين المسجلين.");return}
+  const pid="p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  await w(()=>db.doc("players/"+pid).set({name,dept:+$("newDept").value,out:null,at:Date.now()}));
+  D.players[pid]={id:pid,name,dept:+$("newDept").value,out:null};
+  await join(pid);
+}
+async function join(pid){
+  const S=st(),p=D.players[pid];if(!p||S.phase!=="open")return;
+  const id=S.round+"_"+pid;
+  if(D.entries[id]){showErr("هذا المتسابق منضم بالفعل للجولة من حاسبة أخرى.");return}
+  await w(()=>db.doc("entries/"+id).set({r:S.round,pid,name:p.name,dept:p.dept,status:"joined",ms:null,errors:0,at:Date.now()}));
+  seat={r:S.round,pid};ls.set("tr-seat",seat);lastStageKey="";render();
+}
+async function leave(){if(!seat)return;const id=seat.r+"_"+seat.pid;seat=null;ls.set("tr-seat",null);
+  await w(()=>db.doc("entries/"+id).delete());lastStageKey="";render()}
+
+/* ---------------- local race ---------------- */
+function maybeStartLocal(){
+  const S=st();if(S.phase!=="live"||!seat||seat.r!==S.round)return;
+  const mine=D.entries[seat.r+"_"+seat.pid];if(!mine||mine.status!=="joined")return;
+  if(L.nonce===S.nonce)return;
+  L={nonce:S.nonce,stage:"cd",t0:0,errors:0,timer:null,text:S.sentence,lastLen:0};
+  const late=Date.now()-S.nonce>((S.cd||10)+5)*1000; // reloaded mid-round
+  let n=late?0:(S.cd||10);
+  const ov=$("cd");
+  const show=()=>{$("cdn").textContent=n;$("cdn").classList.remove("pop");void $("cdn").offsetWidth;$("cdn").classList.add("pop")};
+  const go=()=>{ov.hidden=true;L.stage="type";L.t0=performance.now();lastStageKey="";renderStage();
+    L.timer=setInterval(()=>{const c=$("clock");if(c)c.textContent=((performance.now()-L.t0)/1000).toFixed(2)},50)};
+  if(n<=0){go();return}
+  ov.hidden=false;$("cdt").textContent="استعد… الجولة "+S.round;show();
+  const iv=setInterval(()=>{n--;if(n>0)show();else{clearInterval(iv);$("cdt").textContent="";$("cdn").textContent="انطلق";setTimeout(go,500)}},1000);
+  renderStage();
+}
+function paint(typed){
+  const T=L.text,U=typed;let html="",i=0;const words=T.split(" "),cur=U.split(" ").length-1;
+  words.forEach((wd,wi)=>{html+=`<span class="${wi===cur&&U.length<T.length?"cur":""}">`;
+    for(const ch of wd){const u=U[i];html+=`<span class="${u===undefined?"c":(norm(u)===norm(ch)?"ok":"no")}">${esc(ch)}</span>`;i++}
+    html+="</span>";if(wi<words.length-1){const u=U[i];html+=`<span class="${u===undefined?"c":(u===" "?"ok":"no")}"> </span>`;i++}});
+  $("passage").innerHTML=html;$("prog").style.width=Math.min(100,U.length/T.length*100)+"%";
+}
+function onType(){
+  if(L.stage!=="type")return;const t=$("typed");let v=t.value.replace(/\n/g," ");
+  if(v.length>L.text.length)v=v.slice(0,L.text.length);if(v!==t.value)t.value=v;
+  if(v.length>L.lastLen){for(let i=L.lastLen;i<v.length;i++)if(norm(v[i])!==norm(L.text[i]))L.errors++;$("errs").textContent=L.errors}
+  L.lastLen=v.length;paint(v);
+  if(norm(v)===norm(L.text))finishMine();
+}
+async function finishMine(){
+  if(L.stage!=="type")return;L.stage="done";clearInterval(L.timer);
+  const ms=Math.round(performance.now()-L.t0);
+  const id=seat.r+"_"+seat.pid,mine=D.entries[id];
+  const body={r:mine.r,pid:mine.pid,name:mine.name,dept:mine.dept,status:"done",ms,errors:L.errors,at:mine.at||Date.now(),doneAt:Date.now()};
+  try{await w(()=>db.doc("entries/"+id).set(body))}catch(e){setTimeout(()=>db.doc("entries/"+id).set(body).catch(()=>{}),1500)}
+  D.entries[id]={...mine,status:"done",ms,errors:L.errors};lastStageKey="";render();
+}
+
+/* ---------------- live board ---------------- */
+function renderBoard(){
+  const S=st(),es=sortEntries(roundEntries(S.round));const fin=allDone(S.round);
+  const elim=D.rounds["r"+S.round]?.eliminated||[];
+  const totalP=Object.keys(D.players).length,activeP=Object.values(D.players).filter(p=>!p.out).length;
+  let rows=es.map((e,i)=>{const stt=e.status==="done"?`<span class="st done">${fmt(e.ms)}</span>`:e.status==="dnf"?`<span class="st dnf">لم يكمل</span>`:S.phase==="live"?`<span class="st typing">يكتب…</span>`:`<span class="st">جاهز</span>`;
+    const out=elim.includes(e.pid);
+    return `<tr class="${out?"cut":""} ${e.status==="done"&&i<3?"r"+(i+1):""}"><td>${e.status==="done"?`<span class="rank">${i+1}</span>`:""}</td><td>${DEPTS[e.dept]?.e||""} ${esc(e.name)}${out?` <span class="st out">مستبعد</span>`:""}</td><td class="n">${stt}</td>${isAdmin&&S.phase==="open"?`<td><button class="x" data-kick="${e.id}" aria-label="إزالة ${esc(e.name)}">✕</button></td>`:""}</tr>`}).join("");
+  $("board").innerHTML=`<h2>الجولة ${S.round}</h2>
+  <div class="note" style="margin:0 0 10px">${es.length} في الجولة · ${es.filter(e=>e.status!=="joined").length} أنهوا · ${activeP} متأهل من ${totalP}</div>
+  ${es.length?`<div class="tw"><table><thead><tr><th></th><th>المتسابق</th><th>الوقت</th>${isAdmin&&S.phase==="open"?"<th></th>":""}</tr></thead><tbody>${rows}</tbody></table></div>`:`<p class="empty">لم ينضم أحد بعد. يختار كل متسابق اسمه من حاسبته.</p>`}
+  ${S.phase==="live"&&fin?`<p class="note" style="color:var(--ok);font-weight:700">انتهى جميع المتسابقين، الجولة منتهية.</p>`:""}`;
+  $("board").querySelectorAll("[data-kick]").forEach(b=>b.onclick=()=>w(()=>db.doc("entries/"+b.dataset.kick).delete()));
+}
+
+/* ---------------- admin ---------------- */
+$("adminBtn").onclick=()=>{
+  if(isAdmin){isAdmin=false;ss.set("tr-admin","0");lastStageKey="";render();return}
+  $("admin").hidden=false;
+  $("admin").innerHTML=`<h2>دخول الحكم</h2><div class="row"><div><label for="pin">رمز الحكم</label><input type="password" id="pin" inputmode="numeric"></div><button class="key gold" id="pinGo">دخول</button></div><p class="note" id="pinMsg"></p>`;
+  const tryPin=()=>{if($("pin").value===ADMIN_PIN){isAdmin=true;ss.set("tr-admin","1");lastStageKey="";render()}else $("pinMsg").textContent="الرمز غير صحيح."};
+  $("pinGo").onclick=tryPin;$("pin").addEventListener("keydown",e=>{if(e.key==="Enter")tryPin()});$("pin").focus();
+};
+let adminKey="",resetArmed=false;
+function renderAdmin(){
+  const S=st(),es=roundEntries(S.round),fin=allDone(S.round),closed=S.phase==="closed";
+  if(draft.round!==S.round){draft.round=S.round;draft.sentence=null;draft.cut=null}
+  if(S.phase==="open"&&!draft.sentence)draft.sentence=suggest();
+  const key=[S.phase,S.round,fin,es.length,es.filter(e=>e.status!=="joined").length,JSON.stringify(D.rounds["r"+S.round]||null),draft.cut&&[...draft.cut].join(),resetArmed].join("|");
+  if(key===adminKey)return;adminKey=key;
+  let h=`<div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">لوحة الحكم · الجولة ${S.round}</h2></div>`;
+  if(S.phase==="open"){
+    h+=`<div style="margin-top:12px"><label for="sent">جملة الجولة (موحدة لجميع المتسابقين)</label><textarea class="in" id="sent">${esc(draft.sentence)}</textarea></div>
+    <div class="row" style="margin-top:10px"><div><label for="cdS">مدة العداد قبل البدء (ثانية)</label><input type="number" id="cdS" min="3" max="60" value="${draft.cd}"></div>
+    <button class="key" id="newSent">اقتراح جملة أخرى</button></div>
+    <p class="note">المنضمون الآن: <b>${es.length}</b>. تُخفى الجملة عن المتسابقين حتى ينتهي العداد.</p>
+    <div class="actions"><button class="key red" id="startRound" ${es.length?"":"disabled"}>تشغيل العداد وبدء الجولة</button>
+    ${Object.keys(D.rounds).length?`<button class="key gold" id="toFinal">إنهاء المسابقة وعرض النتائج</button>`:""}</div>`;
+  }else if(S.phase==="live"&&!fin){
+    h+=`<p class="note" style="font-size:15px">الجملة: <b style="font-family:var(--text);font-size:18px">${esc(S.sentence)}</b></p>
+    <p>أنهى <b>${es.filter(e=>e.status!=="joined").length}</b> من <b>${es.length}</b>. تنتهي الجولة تلقائياً عند انتهاء آخر متسابق.</p>
+    <div class="actions"><button class="key" id="forceEnd">إنهاء الجولة الآن (من لم يكمل يُسجَّل «لم يكمل»)</button></div>`;
+  }else if(S.phase==="live"&&fin){
+    const sorted=sortEntries(es);
+    if(!draft.cut){const n=Math.min(draft.elim,sorted.length);draft.cut=new Set(sorted.slice(sorted.length-n).map(e=>e.pid))}
+    h+=`<p>انتهت الجولة. حدّد عدد المستبعدين، ويُختار الأبطأ تلقائياً ويمكنك التعديل يدوياً.</p>
+    <div class="row"><div style="flex:0 1 200px"><label for="elimN">عدد المستبعدين</label><input type="number" id="elimN" min="0" max="${sorted.length}" value="${draft.cut.size}"></div></div>
+    <div class="tw" style="margin-top:10px"><table><thead><tr><th>استبعاد</th><th>الترتيب</th><th>المتسابق</th><th>الوقت</th><th>الأخطاء</th></tr></thead><tbody>
+    ${sorted.map((e,i)=>`<tr class="${draft.cut.has(e.pid)?"cut":""}"><td><input type="checkbox" data-cut="${e.pid}" ${draft.cut.has(e.pid)?"checked":""} aria-label="استبعاد ${esc(e.name)}"></td><td class="n">${i+1}</td><td>${DEPTS[e.dept]?.e||""} ${esc(e.name)}</td><td class="n">${e.status==="done"?fmt(e.ms):"لم يكمل"}</td><td class="n">${e.errors||0}</td></tr>`).join("")}
+    </tbody></table></div>
+    <div class="actions"><button class="key red" id="approve">اعتماد المستبعدين (${draft.cut.size}) وإغلاق الجولة</button></div>`;
+  }else if(closed){
+    const r=D.rounds["r"+S.round];
+    h+=`<p>أُغلقت الجولة ${S.round}. المستبعدون: <b>${r?.eliminated?.length||0}</b>. المتأهلون الآن: <b>${Object.values(D.players).filter(p=>!p.out).length}</b>.</p>
+    <div class="actions"><button class="key primary" id="nextRound">فتح الجولة ${S.round+1}</button><button class="key gold" id="toFinal">إنهاء المسابقة وعرض النتائج</button></div>`;
+  }else if(S.phase==="final"){
+    h+=`<p>النتائج النهائية معروضة على جميع الشاشات.</p><div class="actions"><button class="key" id="backComp">العودة إلى المسابقة</button></div>`;
+  }
+  h+=`<details style="margin-top:16px"><summary class="note" style="cursor:pointer">خيارات متقدمة</summary>
+  <div class="actions"><button class="key red sm" id="resetAll">${resetArmed?"اضغط مرة ثانية للتأكيد: حذف كل البيانات":"مسابقة جديدة (حذف كل المتسابقين والنتائج)"}</button></div></details>`;
+  $("admin").innerHTML=h;
+  const on=(id,fn)=>{const b=$(id);if(b)b.onclick=fn};
+  if($("sent"))$("sent").oninput=e=>{draft.sentence=e.target.value};
+  if($("cdS"))$("cdS").oninput=e=>{draft.cd=Math.max(3,Math.min(60,+e.target.value||10))};
+  on("newSent",()=>{draft.sentence=suggest();$("sent").value=draft.sentence});
+  on("startRound",async()=>{const s=($("sent").value||"").trim().replace(/\s+/g," ");if(!s){showErr("اكتب جملة الجولة أولاً.");return}
+    await w(()=>db.doc("comp/state").set({round:S.round,phase:"live",sentence:s,cd:draft.cd,nonce:Date.now()}))});
+  on("forceEnd",async()=>{for(const e of es.filter(e=>e.status==="joined"))await w(()=>db.doc("entries/"+e.id).set({r:e.r,pid:e.pid,name:e.name,dept:e.dept,status:"dnf",ms:null,errors:e.errors||0,at:e.at||Date.now()}))});
+  if($("elimN"))$("elimN").onchange=e=>{const sorted=sortEntries(es);const n=Math.max(0,Math.min(sorted.length,+e.target.value||0));draft.elim=n;draft.cut=new Set(sorted.slice(sorted.length-n).map(x=>x.pid));adminKey="";renderAdmin()};
+  $("admin").querySelectorAll("[data-cut]").forEach(c=>c.onchange=()=>{c.checked?draft.cut.add(c.dataset.cut):draft.cut.delete(c.dataset.cut);adminKey="";renderAdmin()});
+  on("approve",async()=>{const cut=[...draft.cut];
+    for(const pid of cut)if(D.players[pid])await w(()=>db.doc("players/"+pid).update({out:S.round}));
+    await w(()=>db.doc("rounds/r"+S.round).set({n:S.round,sentence:S.sentence,eliminated:cut,count:es.length,at:Date.now()}));
+    await w(()=>db.doc("comp/state").set({round:S.round,phase:"closed",sentence:S.sentence}));draft.cut=null});
+  on("nextRound",()=>w(()=>db.doc("comp/state").set({round:S.round+1,phase:"open"})));
+  on("toFinal",()=>w(()=>db.doc("comp/state").set({...S,phase:"final",prev:S.phase})));
+  on("backComp",()=>w(()=>db.doc("comp/state").set({...S,phase:S.prev||"closed"})));
+  on("resetAll",async()=>{if(!resetArmed){resetArmed=true;adminKey="";renderAdmin();setTimeout(()=>{resetArmed=false;adminKey="";isAdmin&&renderAdmin()},5000);return}
+    resetArmed=false;
+    for(const c of ["entries","players","rounds"]){const s=await db.collection(c).get();for(const d of s.docs)await w(()=>db.doc(c+"/"+d.id).delete())}
+    await w(()=>db.doc("comp/state").set({round:1,phase:"open"}));seat=null;ls.set("tr-seat",null);draft={sentence:null,cd:10,elim:1,cut:null,round:null}});
+}
+
+/* ---------------- final report ---------------- */
+function renderFinal(){
+  const rounds=Object.values(D.rounds).sort((a,b)=>a.n-b.n);const nR=Math.max(rounds.length,...Object.values(D.entries).map(e=>e.r),0);
+  const rn=[...Array(nR)].map((_,i)=>i+1);
+  const ps=Object.values(D.players).map(p=>{
+    const byR={};Object.values(D.entries).filter(e=>e.pid===p.id).forEach(e=>byR[e.r]=e);
+    const played=Object.keys(byR).map(Number).sort((a,b)=>a-b);const last=played[played.length-1];
+    const lastE=byR[last];const done=Object.values(byR).filter(e=>e.status==="done");
+    const best=done.length?Math.min(...done.map(e=>e.ms)):null;
+    const total=done.reduce((a,e)=>a+e.ms,0);
+    return{p,byR,last:last||0,lastMs:lastE&&lastE.status==="done"?lastE.ms:Infinity,best,total,out:p.out}});
+  ps.sort((a,b)=>{const ra=a.out?a.out:1e9,rb=b.out?b.out:1e9;return rb-ra||b.last-a.last||a.lastMs-b.lastMs||a.p.name.localeCompare(b.p.name,"ar")});
+  const top=ps.filter(x=>x.last).slice(0,3);
+  const date=new Date().toLocaleDateString("ar-IQ",{year:"numeric",month:"long",day:"numeric"});
+  const allMs=Object.values(D.entries).filter(e=>e.status==="done").map(e=>e.ms);
+  $("final").innerHTML=`<section class="report">
+    <div class="rhead"><div><p class="sub">النتائج النهائية</p><h2 style="font-size:34px;margin:0">مسابقة الطباعة السريعة على لوحة المفاتيح</h2><p class="sub">كلية الإدارة والاقتصاد · جامعة الموصل · ${date}</p></div></div>
+    <div class="sumrow"><span class="sum">المتسابقون<b>${ps.length}</b></span><span class="sum">الجولات<b>${nR}</b></span>
+    <span class="sum">أسرع زمن<b>${allMs.length?fmt(Math.min(...allMs)):"—"}</b></span>
+    <span class="sum">متوسط الزمن<b>${allMs.length?fmt(allMs.reduce((a,b)=>a+b,0)/allMs.length):"—"}</b></span></div>
+    ${top.length?`<div class="podium">${[1,0,2].filter(i=>top[i]).map(i=>{const x=top[i];return `<div class="pod p${i+1}"><div class="m">${["الأول","الثاني","الثالث"][i]}</div><b>${DEPTS[x.p.dept].e} ${esc(x.p.name)}</b><div class="note">${DEPTS[x.p.dept].n}</div><div class="tm">آخر جولة: ${x.lastMs===Infinity?"لم يكمل":fmt(x.lastMs)}</div></div>`}).join("")}</div>`:""}
+    <div class="tw"><table><thead><tr><th>الترتيب</th><th>المتسابق</th><th>القسم</th>${rn.map(r=>`<th class="n">ج${r}</th>`).join("")}<th class="n">أفضل زمن</th><th>الحالة</th></tr></thead><tbody>
+    ${ps.map((x,i)=>`<tr class="${i<3&&x.last?"r"+(i+1):""}"><td class="n"><span class="rank">${i+1}</span></td><td><b>${esc(x.p.name)}</b></td><td>${DEPTS[x.p.dept].e} ${DEPTS[x.p.dept].n}</td>
+      ${rn.map(r=>{const e=x.byR[r];return `<td class="n">${!e?"—":e.status==="done"?fmt(e.ms):e.status==="dnf"?"لم يكمل":"…"}</td>`}).join("")}
+      <td class="n"><b>${fmt(x.best)}</b></td>
+      <td>${x.out?`<span class="st out">مستبعد في ج${x.out}</span>`:x.last?(i===0?`<span class="st win">الفائز</span>`:`<span class="st done">متأهل</span>`):`<span class="st">لم يشارك</span>`}</td></tr>`).join("")}
+    </tbody></table></div>
+    <p class="note">الترتيب: المتأهلون أولاً حسب زمنهم في آخر جولة، ثم المستبعدون حسب الجولة التي خرجوا فيها (الأبعد وصولاً أعلى) ثم زمنهم فيها.</p>
+  </section>`;
+}
+</script>
+
+</body>
+</html>
