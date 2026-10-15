@@ -1,10 +1,9 @@
-// إعدادات مشروع Firebase الخاص بالمسابقة
-// انسخ القيم من: Firebase Console > Project settings > Your apps > Web app
+// إعدادات مشروع Firebase الخاص بالمسابقة (speed-write)
 window.FIREBASE_CONFIG = {
-  apiKey: "PUT_API_KEY_HERE",
-  authDomain: "PUT_PROJECT_ID.firebaseapp.com",
-  projectId: "PUT_PROJECT_ID",
-  storageBucket: "PUT_PROJECT_ID.appspot.com",
-  messagingSenderId: "PUT_SENDER_ID",
-  appId: "PUT_APP_ID"
+  apiKey: "AIzaSyAvU7ZcH1GGrUMXqEhO6l_G2QcrMSYLvds",
+  authDomain: "speed-write-df889.firebaseapp.com",
+  projectId: "speed-write-df889",
+  storageBucket: "speed-write-df889.firebasestorage.app",
+  messagingSenderId: "915031451390",
+  appId: "1:915031451390:web:eee793b39098de4cf867af"
 };
