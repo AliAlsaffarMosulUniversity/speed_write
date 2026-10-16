@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>مسابقة الطباعة السريعة</title>
+<title>الكاتب السريع</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=Readex+Pro:wght@400;500;700&family=Noto+Naskh+Arabic:wght@500;600&display=swap">
 <style>
@@ -106,8 +106,8 @@ footer .by{font-weight:700;font-size:15px;background:linear-gradient(90deg,#a874
 <div class="wrap">
   <header>
     <div>
-      <h1>مسابقة <span>الطباعة السريعة</span></h1>
-      <p class="sub">كلية الإدارة والاقتصاد · جامعة الموصل</p>
+      <h1>الكاتب <span>السريع</span></h1>
+      <p class="sub">مسابقة الطباعة السريعة · كلية الإدارة والاقتصاد · جامعة الموصل</p>
     </div>
     <div class="hright">
       <span class="pill" id="roundPill">جارٍ الاتصال…</span>
@@ -434,7 +434,7 @@ function renderFinal(){
   const date=new Date().toLocaleDateString("ar-IQ",{year:"numeric",month:"long",day:"numeric"});
   const allMs=Object.values(D.entries).filter(e=>e.status==="done").map(e=>e.ms);
   $("final").innerHTML=`<section class="report">
-    <div class="rhead"><div><p class="sub">النتائج النهائية</p><h2 style="font-size:34px;margin:0">مسابقة الطباعة السريعة على لوحة المفاتيح</h2><p class="sub">كلية الإدارة والاقتصاد · جامعة الموصل · ${date}</p></div></div>
+    <div class="rhead"><div><p class="sub">النتائج النهائية</p><h2 style="font-size:34px;margin:0">مسابقة الكاتب السريع</h2><p class="sub">كلية الإدارة والاقتصاد · جامعة الموصل · ${date}</p></div></div>
     <div class="sumrow"><span class="sum">المتسابقون<b>${ps.length}</b></span><span class="sum">الجولات<b>${nR}</b></span>
     <span class="sum">أسرع زمن<b>${allMs.length?fmt(Math.min(...allMs)):"—"}</b></span>
     <span class="sum">متوسط الزمن<b>${allMs.length?fmt(allMs.reduce((a,b)=>a+b,0)/allMs.length):"—"}</b></span></div>
