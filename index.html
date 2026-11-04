@@ -24,6 +24,10 @@ body{margin:0;font-family:var(--body);direction:rtl;font-size:15px;line-height:1
 header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px solid var(--line);padding-bottom:14px}
 h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,42px);margin:0;line-height:1.2;text-wrap:balance}
 h1 span{color:var(--accent)}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.logos{display:flex;gap:10px;flex:none}
+.logos img{width:92px;height:92px;object-fit:contain;display:block}
+@media (max-width:560px){.logos img{width:56px;height:56px}.brand{gap:10px}}
 .sub{color:var(--muted);margin:0;font-size:14px}
 .hright{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .pill{font-weight:700;padding:6px 14px;border-radius:99px;background:#e9edf6;font-size:14px;white-space:nowrap}
@@ -106,9 +110,15 @@ footer .by{font-weight:700;font-size:15px;background:linear-gradient(90deg,#a874
 <body>
 <div class="wrap">
   <header>
-    <div>
-      <h1>الكاتب <span>السريع</span></h1>
-      <p class="sub">مسابقة الطباعة السريعة · كلية الإدارة والاقتصاد · جامعة الموصل</p>
+    <div class="brand">
+      <div class="logos">
+        <img src="assets/logo-university.png" alt="شعار جامعة الموصل" width="92" height="92" decoding="async">
+        <img src="assets/logo-college.png" alt="شعار كلية الإدارة والاقتصاد" width="92" height="92" decoding="async">
+      </div>
+      <div>
+        <h1>الكاتب <span>السريع</span></h1>
+        <p class="sub">مسابقة الطباعة السريعة · كلية الإدارة والاقتصاد · جامعة الموصل</p>
+      </div>
     </div>
     <div class="hright">
       <span class="pill" id="roundPill">جارٍ الاتصال…</span>
