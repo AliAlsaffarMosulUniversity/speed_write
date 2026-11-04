@@ -170,6 +170,7 @@ const ss={get(k){try{return sessionStorage.getItem(k)}catch(e){return null}},set
 let db=null;
 const D={state:null,players:{},entries:{},rounds:{}};
 let isAdmin=ss.get("tr-admin")==="1";
+let askPin=false; // نموذج إدخال رمز الحكم ظاهر
 let seat=ls.get("tr-seat"); // {r,pid}
 let L={nonce:null,stage:null,t0:0,errors:0,timer:null};
 let draft={sentence:null,cd:10,elim:1,cut:null,round:null};
@@ -214,11 +215,11 @@ function render(){
   if(seat&&(seat.r!==S.round||!D.entries[seat.r+"_"+seat.pid])&&S.phase!=="final"){if(seat.r!==S.round){seat=null;ls.set("tr-seat",null)}}
   // final view
   const fin=S.phase==="final";
-  $("mainGrid").hidden=fin&&!isAdmin;$("final").hidden=!fin;
+  $("mainGrid").hidden=fin&&!isAdmin&&!askPin;$("final").hidden=!fin;
   if(fin)renderFinal();
-  $("adminBtn").textContent=isAdmin?"خروج من لوحة الحكم":"لوحة الحكم";
-  $("admin").hidden=!isAdmin; if(isAdmin)renderAdmin();
-  if(!fin||isAdmin){renderBoard();renderStage()}
+  $("adminBtn").textContent=isAdmin?"خروج من لوحة الحكم":askPin?"إلغاء":"لوحة الحكم";
+  $("admin").hidden=!(isAdmin||askPin); if(isAdmin)renderAdmin();
+  if(!fin||isAdmin||askPin){renderBoard();renderStage()}
   maybeStartLocal();
 }
 
@@ -353,10 +354,11 @@ function renderBoard(){
 
 /* ---------------- admin ---------------- */
 $("adminBtn").onclick=()=>{
-  if(isAdmin){isAdmin=false;ss.set("tr-admin","0");lastStageKey="";render();return}
-  $("admin").hidden=false;
+  if(isAdmin){isAdmin=false;askPin=false;ss.set("tr-admin","0");lastStageKey="";render();return}
+  if(askPin){askPin=false;lastStageKey="";render();return}
+  askPin=true;adminKey="";render();
   $("admin").innerHTML=`<h2>دخول الحكم</h2><div class="row"><div><label for="pin">رمز الحكم</label><input type="password" id="pin" inputmode="numeric"></div><button class="key gold" id="pinGo">دخول</button></div><p class="note" id="pinMsg"></p>`;
-  const tryPin=()=>{if($("pin").value===ADMIN_PIN){isAdmin=true;ss.set("tr-admin","1");lastStageKey="";render()}else $("pinMsg").textContent="الرمز غير صحيح."};
+  const tryPin=()=>{if($("pin").value===ADMIN_PIN){isAdmin=true;askPin=false;adminKey="";ss.set("tr-admin","1");lastStageKey="";render()}else $("pinMsg").textContent="الرمز غير صحيح."};
   $("pinGo").onclick=tryPin;$("pin").addEventListener("keydown",e=>{if(e.key==="Enter")tryPin()});$("pin").focus();
 };
 let adminKey="",resetArmed=false;
