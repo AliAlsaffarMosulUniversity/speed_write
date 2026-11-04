@@ -91,10 +91,11 @@ tr.cut td{background:#fff3f4}
 .pod .tm{font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px}
 .pod.p1{background:linear-gradient(#fff8dd,#ffeaa6);border-color:#e6b02b;padding-block:24px}
 .pod.p1 .m{color:#a87400}.pod.p2 .m{color:#6b7790}.pod.p3 .m{color:#9a5f2b}
-@media (max-width:560px){.podium{grid-template-columns:minmax(0,1fr)}}
-.sumrow{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+@media (max-width:560px){.podium{grid-template-columns:minmax(0,1fr)}.pod.p1{order:-1}.pod.p3{order:2}}
+.sumrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
 .sum{background:var(--panel);border-radius:10px;padding:8px 14px;font-size:13px;color:var(--muted)}
 .sum b{color:var(--ink);font-size:18px;margin-inline-start:6px;font-variant-numeric:tabular-nums}
+.sum small{display:block;font-size:12px;margin-top:2px}
 footer{margin-top:28px;text-align:center;display:flex;flex-direction:column;gap:4px}
 footer .org{font-weight:700;font-size:15px}
 footer .by{font-weight:700;font-size:15px;background:linear-gradient(90deg,#a87400,#f3c94a,#a87400);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -379,7 +380,7 @@ function renderAdmin(){
     <div class="actions"><button class="key" id="forceEnd">إنهاء الجولة الآن (من لم يكمل يُسجَّل «لم يكمل»)</button></div>`;
   }else if(S.phase==="live"&&fin){
     const sorted=sortEntries(es);
-    if(!draft.cut){const n=Math.min(draft.elim,sorted.length);draft.cut=new Set(sorted.slice(sorted.length-n).map(e=>e.pid))}
+    if(!draft.cut){const n=Math.min(draft.elim,Math.max(0,sorted.length-1));draft.cut=new Set(sorted.slice(sorted.length-n).map(e=>e.pid))}
     h+=`<p>انتهت الجولة. حدّد عدد المستبعدين، ويُختار الأبطأ تلقائياً ويمكنك التعديل يدوياً.</p>
     <div class="row"><div style="flex:0 1 200px"><label for="elimN">عدد المستبعدين</label><input type="number" id="elimN" min="0" max="${sorted.length}" value="${draft.cut.size}"></div></div>
     <div class="tw" style="margin-top:10px"><table><thead><tr><th>استبعاد</th><th>الترتيب</th><th>المتسابق</th><th>الوقت</th><th>الأخطاء</th></tr></thead><tbody>
@@ -431,19 +432,22 @@ function renderFinal(){
     return{p,byR,last:last||0,lastMs:lastE&&lastE.status==="done"?lastE.ms:Infinity,best,total,out:p.out}});
   ps.sort((a,b)=>{const ra=a.out?a.out:1e9,rb=b.out?b.out:1e9;return rb-ra||b.last-a.last||a.lastMs-b.lastMs||a.p.name.localeCompare(b.p.name,"ar")});
   const top=ps.filter(x=>x.last).slice(0,3);
-  const date=new Date().toLocaleDateString("ar-IQ",{year:"numeric",month:"long",day:"numeric"});
-  const allMs=Object.values(D.entries).filter(e=>e.status==="done").map(e=>e.ms);
+  const date=new Date().toLocaleDateString("ar-IQ-u-nu-latn",{year:"numeric",month:"long",day:"numeric"});
+  const doneAll=Object.values(D.entries).filter(e=>e.status==="done");
+  const allMs=doneAll.map(e=>e.ms);
+  const fastest=doneAll.length?doneAll.reduce((a,b)=>b.ms<a.ms?b:a):null;
+  const podOrder=top.length>=3?[1,0,2]:[0,1,2];
   $("final").innerHTML=`<section class="report">
     <div class="rhead"><div><p class="sub">النتائج النهائية</p><h2 style="font-size:34px;margin:0">مسابقة الكاتب السريع</h2><p class="sub">كلية الإدارة والاقتصاد · جامعة الموصل · ${date}</p></div></div>
     <div class="sumrow"><span class="sum">المتسابقون<b>${ps.length}</b></span><span class="sum">الجولات<b>${nR}</b></span>
-    <span class="sum">أسرع زمن<b>${allMs.length?fmt(Math.min(...allMs)):"—"}</b></span>
+    <span class="sum">أسرع زمن<b>${allMs.length?fmt(Math.min(...allMs)):"—"}</b>${fastest?`<small>${esc(fastest.name)} · الجولة ${fastest.r}</small>`:""}</span>
     <span class="sum">متوسط الزمن<b>${allMs.length?fmt(allMs.reduce((a,b)=>a+b,0)/allMs.length):"—"}</b></span></div>
-    ${top.length?`<div class="podium">${[1,0,2].filter(i=>top[i]).map(i=>{const x=top[i];return `<div class="pod p${i+1}"><div class="m">${["الأول","الثاني","الثالث"][i]}</div><b>${DEPTS[x.p.dept].e} ${esc(x.p.name)}</b><div class="note">${DEPTS[x.p.dept].n}</div><div class="tm">آخر جولة: ${x.lastMs===Infinity?"لم يكمل":fmt(x.lastMs)}</div></div>`}).join("")}</div>`:""}
+    ${top.length?`<div class="podium">${podOrder.filter(i=>top[i]).map(i=>{const x=top[i];return `<div class="pod p${i+1}"><div class="m">${["الأول","الثاني","الثالث"][i]}</div><b>${DEPTS[x.p.dept].e} ${esc(x.p.name)}</b><div class="note">${DEPTS[x.p.dept].n}</div><div class="tm">آخر جولة: ${x.lastMs===Infinity?"لم يكمل":fmt(x.lastMs)}</div></div>`}).join("")}</div>`:""}
     <div class="tw"><table><thead><tr><th>الترتيب</th><th>المتسابق</th><th>القسم</th>${rn.map(r=>`<th class="n">ج${r}</th>`).join("")}<th class="n">أفضل زمن</th><th>الحالة</th></tr></thead><tbody>
-    ${ps.map((x,i)=>`<tr class="${i<3&&x.last?"r"+(i+1):""}"><td class="n"><span class="rank">${i+1}</span></td><td><b>${esc(x.p.name)}</b></td><td>${DEPTS[x.p.dept].e} ${DEPTS[x.p.dept].n}</td>
+    ${ps.map((x,i)=>`<tr class="${i<3&&x.last?"r"+(i+1):""}"><td class="n">${x.last?`<span class="rank">${i+1}</span>`:"—"}</td><td><b>${esc(x.p.name)}</b></td><td>${DEPTS[x.p.dept].e} ${DEPTS[x.p.dept].n}</td>
       ${rn.map(r=>{const e=x.byR[r];return `<td class="n">${!e?"—":e.status==="done"?fmt(e.ms):e.status==="dnf"?"لم يكمل":"…"}</td>`}).join("")}
       <td class="n"><b>${fmt(x.best)}</b></td>
-      <td>${x.out?`<span class="st out">مستبعد في ج${x.out}</span>`:x.last?(i===0?`<span class="st win">الفائز</span>`:`<span class="st done">متأهل</span>`):`<span class="st">لم يشارك</span>`}</td></tr>`).join("")}
+      <td>${!x.last?`<span class="st">لم يشارك</span>`:i===0?`<span class="st win">الفائز</span>`:x.out?`<span class="st out">مستبعد في ج${x.out}</span>`:`<span class="st done">متأهل</span>`}</td></tr>`).join("")}
     </tbody></table></div>
     <p class="note">الترتيب: المتأهلون أولاً حسب زمنهم في آخر جولة، ثم المستبعدون حسب الجولة التي خرجوا فيها (الأبعد وصولاً أعلى) ثم زمنهم فيها.</p>
   </section>`;
